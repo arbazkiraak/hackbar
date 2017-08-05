@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RDF xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:em="http://www.mozilla.org/2004/em-rdf#">
+  <Description about="urn:mozilla:install-manifest">
+    <em:id>{2B5E9984-75A1-11E5-963A-2E7C1D5D46B0}</em:id>
+    <em:type>2</em:type>
+    <em:name>~/@H3LL4R_H5H HackMod</em:name>
+	<em:developer>~/@H3LL4R_H5H</em:developer>
+    <em:developer>~/@IN73Ct0R_D3V!L</em:developer>
+	<em:developer>~/@DH4N!_D0C</em:developer>
+    <em:developer>~/@IND!_G34R</em:developer>
+    <em:version>v1.4</em:version>
+    <em:description>Thanks To Team HSH And Others , k4jji , tPr0</em:description>
+    <em:homepageURL>https://facebook.com/734M.H5H</em:homepageURL>
+    <em:iconURL>chrome://hackbar/skin/icon.png</em:iconURL>
+    <em:targetApplication>
+      <Description>
+        <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
+        <!-- Firefox -->
+        <em:minVersion>1.5</em:minVersion>
+        <em:maxVersion>8.*</em:maxVersion>
+      </Description>
+    </em:targetApplication>
+  </Description>
+</RDF>

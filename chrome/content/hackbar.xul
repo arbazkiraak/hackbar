@@ -1,0 +1,763 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet href="chrome://hackbar/skin/hackbar.css" type="text/css"?>
+<!DOCTYPE overlay SYSTEM "chrome://hackbar/locale/hackbar.dtd" >
+<overlay id="hackBarOverlay" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+  <script type="application/x-javascript" src="chrome://hackbar/content/namespace.js" />
+  <script type="application/x-javascript" src="chrome://hackbar/content/Encrypt.js" />
+  <script type="application/x-javascript" src="chrome://hackbar/content/Toolbox.js" />
+  <script type="application/x-javascript" src="chrome://hackbar/content/TabManagement.js" />
+  <script type="application/x-javascript" src="chrome://hackbar/content/Crypto.js" />
+  <script type="application/x-javascript" src="chrome://hackbar/content/SQL.js" />
+  <script type="application/x-javascript" src="chrome://hackbar/content/GUI.js" />
+  <script type="application/x-javascript" src="chrome://hackbar/content/Strings.js" />
+  <script type="application/x-javascript" src="chrome://hackbar/content/Main.js" />
+  <script type="application/x-javascript" src="chrome://hackbar/content/java.js"/>
+  <script type="application/x-javascript" src="chrome://hackbar/content/VM.js"/>
+
+  <script type="application/x-javascript">
+  <![CDATA[
+    var hackBar = new HackBar.Main( window );
+  ]]>
+  </script>
+
+  <toolbarpalette id="BrowserToolbarPalette">
+    <toolbarbutton id="hackBarToolbarButton"/>
+  </toolbarpalette>
+  <toolbarbutton id="hackBarToolbarButton" label="Toggle HackBar" tooltiptext="&hackbar.toolsMenuShowHide;" oncommand="hackBar.toggleBar()" class="hackBarToolbarButton chromeclass-toolbar-additional custombutton" />
+
+  <commandset id="mainCommandSet">
+    <command id="cmd_toggleHackBar" oncommand="hackBar.toggleBar()"/>
+  </commandset>
+
+  <keyset id="mainKeyset">
+    <key id="key_toggleHackBar" keycode="VK_F9" command="cmd_toggleHackBar"/>
+    <key key="+" modifiers="alt" oncommand="hackBar.selectionNumberChange( 1 )" />
+    <key key="-" modifiers="alt" oncommand="hackBar.selectionNumberChange( -1 )" />
+    <key key="y" modifiers="alt" oncommand="selectionToSQLChar( 'mysql' )" />
+    <key key="q" modifiers="alt" oncommand="selectionToSQLChar( 'mssql' )" />
+    <key key="m" modifiers="alt" oncommand="hackBar.selectionToMD5()" />
+    <key key="a" modifiers="alt" oncommand="hackBar.useCurrentUrl()" />
+    <key key="s" modifiers="alt" oncommand="hackBar.splitUrl()" />
+    <key key="x" modifiers="alt" oncommand="hackBar.loadUrl()" />
+  </keyset>
+
+  <menupopup id="menu_ToolsPopup">
+    <menuitem lass="menuitem-iconic" image="chrome://hackbar/skin/hackbar_icon.png" label="&hackbar.toolsMenuShowHide;" key="key_toggleHackBar" insertafter="devToolsSeparator" oncommand="hackBar.toggleBar()" />
+  </menupopup>
+
+  <toolbox id="navigator-toolbox">
+    <toolbar id="hackBarToolbar" toolbarname="&hackbar.hackbar;" class="chromeclass-toolbar" context="toolbar-context-menu" hidden="false" persist="hidden">
+      <vbox flex="1">
+        <toolbaritem flex="1">
+          <hbox flex="1">
+            <!-- INCREMENT / DECREMENT MENU -->
+            <menulist id="hackBarPlusMinusSelection">
+              <menupopup>
+                <menuitem label="INT" />
+                <menuitem label="HEX" />
+                <menuitem label="OCT" />
+                <menuitem label="Alphabet" />
+                <menuitem label="AlNum" />
+              </menupopup>
+            </menulist>
+            <toolbarbutton class="menuitem-iconic" image="chrome://hackbar/skin/minus.gif" tooltiptext="&hackbar.minusTooltip;" label="&hackbar.minusLabel;" oncommand="hackBar.selectionNumberChange( -1 )"/>
+            <toolbarbutton class="menuitem-iconic" image="chrome://hackbar/skin/plus.gif" tooltiptext="&hackbar.plusTooltip;" label="&hackbar.plusToolLabel;" oncommand="hackBar.selectionNumberChange( 1 )" />
+            <!-- / INCREMENT / DECREMENT MENU -->
+            
+
+            <!-- BASIC MENU -->
+            <toolbarbutton class="menuitem-iconic" type="menu" label="&hackbar.SQLMenuLabel;" onmouseover="HackBar.GUI.openToolbarButton(this)">        
+              <menupopup>                 
+                <menu label="Convert statements" class="menu-iconic">
+                  <menupopup>         
+                    <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/database_convert.png" tooltiptext="&hackbar.convertUtf8Tooltip;" label="&hackbar.convertUtf8Label;" oncommand="HackBar.SQL.selectionMySQLConvertUsing( 'utf8' )" />
+                    <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/database_convert.png" tooltiptext="&hackbar.convertLatinTooltip;" label="&hackbar.convertLatinLabel;" oncommand="HackBar.SQL.selectionMySQLConvertUsing( 'latin1' )" />
+                    <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/database.png" label="CAST()" oncommand="HackBar.SQL.statementsCalcTpro('3')"/>
+                    <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/convert.png" label="unhex(hex())" oncommand="HackBar.SQL.statementsCalcTpro('2')"/>          
+                    <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/convert.png" label="uncompress(compress())" oncommand="HackBar.SQL.statementsCalcTpro('4')"/>                
+                  </menupopup>
+                </menu>
+                <menu label="CHAR()" class="menu-iconic">
+                  <menupopup>
+                    <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/mysql.png" tooltiptext="&hackbar.MysqlCharTooltip;" label="&hackbar.MysqlCharLabel;" oncommand="HackBar.SQL.selectionToSQLChar( 'mysql' )" accesskey="y" />        
+                    <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/mssql.png" tooltiptext="&hackbar.MssqlCharTooltip;" label="&hackbar.MssqlCharLabel;" oncommand="HackBar.SQL.selectionToSQLChar( 'mssql' )" accesskey="q" />
+                    <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/orsql.png" tooltiptext="&hackbar.OracleCharTooltip;" label="&hackbar.OracleCharLabel;" oncommand="HackBar.SQL.selectionToSQLChar( 'oracle' )" accesskey="o" />
+                  </menupopup>
+                </menu>
+                <menu label="&hackbar.CommentsLabel;" class="menu-iconic">
+                  <menupopup>
+                    <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/s.png" label="&hackbar.spacesToCommentsLabel2;" oncommand="HackBar.SQL.commentsTpro('1')"/>
+                    <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/s.png" label="&hackbar.spacesToCommentsLabel;" oncommand="HackBar.SQL.commentsTpro('2')"/>
+                    <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/s.png" label="clear" oncommand="HackBar.SQL.commentsTpro('3')"/> 
+                  </menupopup>
+                </menu>
+       <!-- SYSTEM VARIABLES -->
+                <menu label="System variables" class="menu-iconic">
+                  <menupopup>                    
+                <menu label="MySQL" class="menu-iconic" image="chrome://hackbar/skin/mysql.png">
+                  <menupopup>
+                <menu label="VERSION">
+                  <menupopup>
+                    <menuitem class="menuitem-iconic" label="VERSION()" oncommand="HackBar.SQL.SysVariables('2')"/>
+                    <menuitem class="menuitem-iconic" label="@@VERSION" oncommand="HackBar.SQL.SysVariables('1')"/>
+                    <menuitem class="menuitem-iconic" label="@@GLOBAL.VERSION" oncommand="HackBar.SQL.SysVariables('3')"/>
+                    <menuseparator/>
+                    <menuitem class="menuitem-iconic" label="@@VERSION_COMMENT" oncommand="HackBar.SQL.SysVariables('44')"/>
+                  </menupopup>
+                </menu>
+                <menu label="USER">
+                  <menupopup>
+                    <menuitem class="menuitem-iconic" label="USER()" oncommand="HackBar.SQL.SysVariables('5')"/>
+                    <menuitem class="menuitem-iconic" label="CURRENT_USER()" oncommand="HackBar.SQL.SysVariables('6')"/>
+                    <menuitem class="menuitem-iconic" label="SYSTEM_USER()" oncommand="HackBar.SQL.SysVariables('7')"/>
+                    <menuitem class="menuitem-iconic" label="SESSION_USER()" oncommand="HackBar.SQL.SysVariables('8')"/>
+                    <menuseparator/>
+                    <menuitem class="menuitem-iconic" label="SUBSTRING @" oncommand="HackBar.SQL.SysVariables('9')"/>
+                    <menuitem class="menuitem-iconic" label="FROM PROCESSLIST" oncommand="HackBar.SQL.SysVariables('10')"/>
+                  </menupopup>
+                </menu>
+                <menu label="DATABASE">
+                  <menupopup>
+                    <menuitem class="menuitem-iconic" label="DATABASE()" oncommand="HackBar.SQL.SysVariables('11')"/>
+                    <menuitem class="menuitem-iconic" label="SCHEMA()" oncommand="HackBar.SQL.SysVariables('12')"/> 
+                    <menuseparator/>
+                    <menuitem class="menuitem-iconic" label="FROM PROCESSLIST" oncommand="HackBar.SQL.SysVariables('12.1')"/> 
+                  </menupopup>
+                </menu>
+                <menuseparator/>
+                <menu label="Get Server Folders">
+                  <menupopup>
+                    <menuitem class="menuitem-iconic" label="CHARSETS FOLDER" oncommand="HackBar.SQL.SysVariables('32')"/>
+                    <menuitem class="menuitem-iconic" label="ERROR LOG LOCATION" oncommand="HackBar.SQL.SysVariables('36')"/>
+                    <menuitem class="menuitem-iconic" label="LANGUAGE DATADIR" oncommand="HackBar.SQL.SysVariables('35')"/>
+                    <menuitem class="menuitem-iconic" label="PIT FILE" oncommand="HackBar.SQL.SysVariables('39')"/>
+                    <menuitem class="menuitem-iconic" label="PLUGIN DIR" oncommand="HackBar.SQL.SysVariables('40')"/>
+                    <menuitem class="menuitem-iconic" label="SOCKET DIR" oncommand="HackBar.SQL.SysVariables('42')"/>
+                    <menuitem class="menuitem-iconic" label="SQL BASEDIR" oncommand="HackBar.SQL.SysVariables('16')"/>
+                    <menuitem class="menuitem-iconic" label="SQL DATADIR" oncommand="HackBar.SQL.SysVariables('17')"/>
+                    <menuitem class="menuitem-iconic" label="TEMP DIR" oncommand="HackBar.SQL.SysVariables('43')"/>
+                  </menupopup>
+                </menu>
+                <menuseparator/>
+                <menu label="CHARSET">
+                  <menupopup>
+                    <menuitem class="menuitem-iconic" label="CHARSET CLIENT" oncommand="HackBar.SQL.SysVariables('24')"/>
+                    <menuitem class="menuitem-iconic" label="CHARSET CONNECTION" oncommand="HackBar.SQL.SysVariables('23')"/>
+                    <menuitem class="menuitem-iconic" label="CHARSET DATABASE" oncommand="HackBar.SQL.SysVariables('31')"/>
+                    <menuitem class="menuitem-iconic" label="CHARSET FILESYSTEM" oncommand="HackBar.SQL.SysVariables('25')"/>
+                    <menuitem class="menuitem-iconic" label="CHARSET SERVER" oncommand="HackBar.SQL.SysVariables('30')"/>
+                  </menupopup>
+                  </menu>
+                    <menuitem class="menuitem-iconic" label="CASE INTENSIV TABLES" oncommand="HackBar.SQL.SysVariables('38')"/> 
+                    <menuitem class="menuitem-iconic" label="CASE INTENSIV SYSTEM" oncommand="HackBar.SQL.SysVariables('37')"/>
+                    <menuitem class="menuitem-iconic" label="COLLATION SET" oncommand="HackBar.SQL.SysVariables('33')"/>
+                    <menuitem class="menuitem-iconic" label="HOSTNAME" oncommand="HackBar.SQL.SysVariables('13')"/>             
+                    <menuitem class="menuitem-iconic" label="INNODB" oncommand="HackBar.SQL.SysVariables('21')"/>               
+                    <menuitem class="menuitem-iconic" label="OPERATORS" oncommand="HackBar.SQL.SysVariables('26')"/>
+                    <menuitem class="menuitem-iconic" label="PORT SQL" oncommand="HackBar.SQL.SysVariables('41')"/>
+                    <menuitem class="menuitem-iconic" label="RECOVER OPTIONS" oncommand="HackBar.SQL.SysVariables('20')"/>
+                    <menuitem class="menuitem-iconic" label="SERVER OS" oncommand="HackBar.SQL.SysVariables('15')"/>
+                    <menuitem class="menuitem-iconic" label="SERVER OS TYPE" oncommand="HackBar.SQL.SysVariables('14')"/>
+                    <menuitem class="menuitem-iconic" label="SSL OPEN" oncommand="HackBar.SQL.SysVariables('18')"/>
+                    <menuitem class="menuitem-iconic" label="SYMLINK" oncommand="HackBar.SQL.SysVariables('22')"/>
+                    <menuitem class="menuitem-iconic" label="TIMEOUT CONNECTION" oncommand="HackBar.SQL.SysVariables('19')"/>
+                    <menuitem class="menuitem-iconic" label="TIMEOUT WAIT" oncommand="HackBar.SQL.SysVariables('19')"/>     
+                  </menupopup>            
+                  </menu>                  
+                  </menupopup>
+                </menu>
+                <menuseparator />
+                <menu label="Other" class="menu-iconic">
+                  <menupopup>
+                    <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/string1.png" label="LPAD()" oncommand="HackBar.SQL.OtherBasics('1')"/>
+                    <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/string1.png" label="REPEAT()" oncommand="HackBar.SQL.OtherBasics('2')"/>
+                    <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/string1.png" label="IF statement" oncommand="HackBar.SQL.OtherBasics('3')"/> 
+                    <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/string1.png" label="CASE WHEN THEN" oncommand="HackBar.SQL.OtherBasics('4')"/> 
+                  </menupopup>
+                </menu>
+              <!-- / SYSTEM VARIABLES -->
+              </menupopup>  
+            </toolbarbutton>
+      <!-- / BASIC MENU -->
+            
+            <!-- UNION BASED MENU -->
+            <toolbarbutton class="menuitem-iconic" type="menu" label="UNION BASED" onmouseover="HackBar.GUI.openToolbarButton(this)">       
+              <menupopup> 
+              <menu class="menuitem-iconic" image="chrome://hackbar/skin/mssql.gif" type="menu" label="Column count">
+              <menupopup>         
+                <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/basic.png" label="&hackbar.OrderByLabel;" oncommand="HackBar.SQL.statementsTpro('5')"/>
+                <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/basic.png" label="GROUP BY" oncommand="HackBar.SQL.statementsTpro('6')"/>
+                <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/basic.png" label="PROCEDURE ANALYSE()" oncommand="HackBar.SQL.statementsTpro('8')"/>
+                <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/basic.png" label="(SELECT * FROM *)=(SELECT 1)" oncommand="HackBar.SQL.statementsTpro('9')"/>
+              </menupopup>
+              </menu> 
+              <menu class="menuitem-iconic" image="chrome://hackbar/skin/mssql.gif" type="menu" label="Union statement">
+              <menupopup>         
+                <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/basic.png" label="&hackbar.unionSelectLabel1;" oncommand="HackBar.SQL.selectionToUnionSelect()"/>
+                <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/basic.png" label="&hackbar.unionSelectLabel2;" oncommand="HackBar.SQL.UnionSelectGen('1')"/>
+                <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/basic.png" label="&hackbar.unionSelectLabel3;" oncommand="HackBar.SQL.selectionToUnion2()"/>
+              </menupopup>
+              </menu> 
+              <menuseparator/>
+			  
+			  
+			  
+              <menu class="menuitem-iconic" image="chrome://hackbar/skin/mssql.gif" type="menu" label="Basic statements">
+              <menupopup>
+                <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/basic.png" label="USER(),DATABASE(),VERSION()" oncommand="HackBar.SQL.statementsTpro('1')"/>
+                <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/basic.png" label="Count() DATABASES" oncommand="HackBar.SQL.SelectQueries('1')"/>
+                <menuseparator/>
+                <menu label="Privileges check">
+                <menupopup>
+                  <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/database.png" label="via I_S.PRIVILEGES" oncommand="HackBar.SQL.SysVariables('27')"/>
+                  <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/database.png" label="via MySQL SYSTEM TABLE" oncommand="HackBar.SQL.SysVariables('28')"/>
+                </menupopup>
+                </menu>
+                  <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/mysql.png" label="Get running query" oncommand="HackBar.SQL.SysVariables('29')"/>                                  
+                </menupopup>
+                </menu>
+                <menuseparator/>
+				
+				
+				
+                <menu class="menuitem-iconic" image="chrome://hackbar/skin/mssql.gif" type="menu" label="Databases">
+                <menupopup>     
+                  <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/db.png" label="DATABASE_NAMES group_concat()" oncommand="HackBar.SQL.SelectQueries('3')"/>
+                  <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/db.png" label="DATABASE_NAMES one shot" oncommand="HackBar.SQL.SelectQueries('2')"/>                   
+                </menupopup>
+                </menu>
+                <menu class="menuitem-iconic" image="chrome://hackbar/skin/mssql.gif" type="menu" label="Tables">
+                <menupopup>           
+                  <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/tables.png" label="TABLE_NAMES group_concat()" oncommand="HackBar.SQL.statementsTpro('4')"/>
+                  <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/tables.png" label="TABLE_NAMES one shot" oncommand="HackBar.SQL.SelectQueries('4')"/>                  
+                </menupopup>
+                </menu> 
+                <menu class="menuitem-iconic" image="chrome://hackbar/skin/mssql.gif" type="menu" label="Columns">
+                <menupopup>           
+                  <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/columns.png" label="COLUMN_NAMES group_concat()" oncommand="HackBar.SQL.statementsTpro('7')"/>         
+                  <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/columns.png" label="COLUMN_NAMES one shot" oncommand="HackBar.SQL.statementsTpro('10')"/>        
+                </menupopup>
+                </menu> 
+                <menu class="menuitem-iconic" image="chrome://hackbar/skin/mssql.gif" type="menu" label="Data">
+                <menupopup>           
+                  <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/data.png" label="DATA group_concat()" oncommand="HackBar.SQL.statementsTpro('11')"/>         
+                  <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/data.png" label="DATA one shot" oncommand="HackBar.SQL.statementsTpro('12')"/> 
+                </menupopup>
+                </menu>   
+				<menu class="menuitem-iconic" image="chrome://hackbar/skin/mssql.gif" type="menu" label="DIOS MySQL">
+                <menupopup>           
+                 
+					<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/data.png" label="DIOS by Madblood" oncommand="HackBar.SQL.statementsTpro('14')"/>
+					<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/data.png" label="DIOS by T-Pro" oncommand="HackBar.SQL.statementsTpro('15')"/>
+					<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/data.png" label="DIOS by Dr.Z3r0" oncommand="HackBar.SQL.statementsTpro('16')"/>
+					<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/data.png" label="DIOS by Zen" oncommand="HackBar.SQL.statementsTpro('17')"/>
+					<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/data.png" label="DIOS by MakMan" oncommand="HackBar.SQL.statementsTpro('18')"/>
+					<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/data.png" label="DIOS by tr0jan WAF" oncommand="HackBar.SQL.statementsTpro('19')"/>
+					<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/data.png" label="DIOS by Madblood WAF" oncommand="HackBar.SQL.statementsTpro('20')"/>
+					<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/data.png" label="DIOS by Madblood WAF @x" oncommand="HackBar.SQL.statementsTpro('21')"/>
+					<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/data.png" label="DIOS by tr0jan Benchmark()" oncommand="HackBar.SQL.statementsTpro('22')"/>
+					<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/data.png" label="DIOS by r0ot@h3x49" oncommand="HackBar.SQL.statementsTpro('23')"/>
+					<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/data.png" label="DIOS by MakMan " oncommand="HackBar.SQL.statementsTpro('25')"/>
+					<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/data.png" label="DIOS by Ajkaro" oncommand="HackBar.SQL.statementsTpro('26')"/>
+					<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/data.png" label="DIOS by Zen WAF" oncommand="HackBar.SQL.statementsTpro('27')"/>
+					<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/data.png" label="DIOS WAF" oncommand="HackBar.SQL.statementsTpro('28')"/>
+					<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/data.png" label="DIOS by Rummy" oncommand="HackBar.SQL.statementsTpro('29')"/>
+					<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/data.png" label="DIOS by H3LL4R_H5H" oncommand="HackBar.SQL.statementsTpro('24')"/>
+					<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/data.png" label="DIOS by Harsha Haxor" oncommand="HackBar.SQL.statementsTpro('warlock')"/>
+					<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/data.png" label="DIOS by Dhani" oncommand="HackBar.SQL.statementsTpro('dhanu')"/>
+					<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/data.png" label="DIOS by Rahul R@Z" oncommand="HackBar.SQL.statementsTpro('raz')"/>
+					<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/data.png" label="DIOS by DHANI (WAF)" oncommand="HackBar.SQL.statementsTpro('dhanu-waf')"/>
+                </menupopup>
+                </menu>   
+				<menu class="menuitem-iconic" image="chrome://hackbar/skin/mssql.gif" type="menu" label="Shells v1.0">
+                <menupopup>           
+                    <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/data.png" label="Upload Shell (HEX)" oncommand="HackBar.SQL.statementsTpro('shell')"/>
+                </menupopup>
+                </menu>
+				<menu class="menuitem-iconic" image="chrome://hackbar/skin/mssql.gif" type="menu" label="DIOS PostgreSQL">
+                <menupopup>           
+                 
+					<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/data.png" label="FOR POSTGRE 8.4 " oncommand="HackBar.SQL.statementsTpro('30')"/>
+					<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/data.png" label="FOR POSTGRE 9.1" oncommand="HackBar.SQL.statementsTpro('31')"/>
+					<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/data.png" label="ALL VERSION" oncommand="HackBar.SQL.statementsTpro('32')"/>
+					
+                </menupopup>
+                </menu>   
+				
+				
+				<menu class="menuitem-iconic" image="chrome://hackbar/skin/mssql.gif" type="menu" label="DIOS MSSQL">
+                <menupopup>           
+                 
+					<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/data.png" label="DIOS by Rummy / Zen " oncommand="HackBar.SQL.statementsTpro('33')"/>
+					
+                </menupopup>
+                </menu> 
+					
+			<menu class="menuitem-iconic" image="chrome://hackbar/skin/mssql.gif" type="menu" label="VARIABLE METHODS">
+                <menupopup>           
+                 
+					<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/data.png" label="DB Names" oncommand="HackBar.VM.VariableMethod('1')"/>
+					<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/data.png" label="DB Count" oncommand="HackBar.VM.VariableMethod('2')"/>
+					<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/data.png" label="Primary DB Tables Count" oncommand="HackBar.VM.VariableMethod('3')"/>
+					<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/data.png" label="Primary DB Columns Count" oncommand="HackBar.VM.VariableMethod('4')"/>
+					<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/data.png" label="InfoSchema Tables Count" oncommand="HackBar.VM.VariableMethod('5')"/>
+					<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/data.png" label="InfoSchema Columns Count" oncommand="HackBar.VM.VariableMethod('6')"/>
+					
+                </menupopup>
+                </menu>
+
+					<menu class="menuitem-iconic" image="chrome://hackbar/skin/mssql.gif" type="menu" label="LINKS">
+                <menupopup>           
+                 
+					<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/data.png" label="AnonPakForce" oncommand="HackBar.VM.VariableMethod('7')"/>
+					<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/data.png" label="SecurityIdiots" oncommand="HackBar.VM.VariableMethod('8')"/>
+					<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/data.png" label="SourceVeiwer" oncommand="HackBar.VM.VariableMethod('9')"/>
+					<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/data.png" label="LiveHttpHeader" oncommand="HackBar.VM.VariableMethod('10')"/>
+					<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/data.png" label="TamperData" oncommand="HackBar.VM.VariableMethod('11')"/>
+					<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/data.png" label="Theme" oncommand="HackBar.VM.VariableMethod('12')"/>
+					
+                </menupopup>
+                </menu> 
+				
+				
+              </menupopup>
+            </toolbarbutton>
+            <!-- / UNION BASED MENU -->
+
+      <!-- ERROR BASED - DOUBLE QUERY -->
+            <toolbarbutton class="menuitem-iconic" type="menu" label="ERROR/DOUBLE QUERY" onmouseover="HackBar.GUI.openToolbarButton(this)">
+              <menupopup>
+                  <menu tooltiptext="" label="Error Based">
+                  <menupopup>
+                  <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/basic.png" label="Get Version" oncommand="HackBar.SQL.ErrorBased('1')"/>
+                  <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/basic.png" label="Get Database" oncommand="HackBar.SQL.ErrorBased('2')"/>
+                  <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/tables.png" label="Get Tables" oncommand="HackBar.SQL.ErrorBased('3')"/>
+                  <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/columns.png" label="Get Columns" oncommand="HackBar.SQL.ErrorBased('4')"/>   
+                  <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/data.png" label="Get Data" oncommand="HackBar.SQL.ErrorBased('5')"/>
+                  </menupopup>
+                  </menu>
+				  
+				  
+				  <menu tooltiptext="" label="POLYGON / MULTIPIONT">
+                  <menupopup>
+                  <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/basic.png" label="Get Version" oncommand="HackBar.SQL.ErrorBased('6')"/>
+                  <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/tables.png" label="Get Tables" oncommand="HackBar.SQL.ErrorBased('7')"/>
+                  </menupopup>
+                  </menu>
+				  
+				  <menu tooltiptext="" label="MULTIPIONT DIOS">
+                  <menupopup>
+                  <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/tables.png" label="DIOS 1." oncommand="HackBar.SQL.ErrorBased('19')"/>
+                  <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/tables.png" label="DIOS 2." oncommand="HackBar.SQL.ErrorBased('20')"/>
+				  <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/tables.png" label="DIOS 3." oncommand="HackBar.SQL.ErrorBased('21')"/>
+				  <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/tables.png" label="DIOS 4." oncommand="HackBar.SQL.ErrorBased('22')"/>
+                  </menupopup>
+                  </menu>
+				  
+				  <menu tooltiptext="" label="Advance Error Based(MySQL >= 5.5 )">
+                  <menupopup>
+                  <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/basic.png" label="Get Version" oncommand="HackBar.SQL.ErrorBased('8')"/>
+                  <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/tables.png" label="Get Tables" oncommand="HackBar.SQL.ErrorBased('9')"/>
+                  </menupopup>
+                  </menu>
+				  
+				  <menu tooltiptext="" label="DIOS By MadBlood (MySQL >= 5.5 )">
+                  <menupopup>
+                  <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/tables.png" label="DIOS  1." oncommand="HackBar.SQL.ErrorBased('10')"/>
+                  <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/tables.png" label="DIOS  2." oncommand="HackBar.SQL.ErrorBased('11')"/>
+				  <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/tables.png" label="DIOS  3." oncommand="HackBar.SQL.ErrorBased('12')"/>
+                  <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/tables.png" label="DIOS  4." oncommand="HackBar.SQL.ErrorBased('13')"/>
+				  <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/tables.png" label="DIOS  5." oncommand="HackBar.SQL.ErrorBased('14')"/>
+				  <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/tables.png" label="DIOS  6." oncommand="HackBar.SQL.ErrorBased('15')"/>
+				  <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/tables.png" label="DIOS  7." oncommand="HackBar.SQL.ErrorBased('16')"/>
+				  <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/tables.png" label="DIOS  8." oncommand="HackBar.SQL.ErrorBased('17')"/>
+				  <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/tables.png" label="DIOS  9." oncommand="HackBar.SQL.ErrorBased('18')"/>
+				  </menupopup>
+                  </menu>
+				  
+				  
+                  <!-- DOUBLE QUERY -->
+                  <menu tooltiptext="" label="Double Query Based">
+                  <menupopup>
+                  <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/basic.png" label="Get Version" oncommand="HackBar.SQL.DoubleQuery('1')"/>
+                  <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/basic.png" label="Get Database" oncommand="HackBar.SQL.DoubleQuery('2')"/>
+                  <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/tables.png" label="Get Tables" oncommand="HackBar.SQL.DoubleQuery('3')"/>
+                  <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/columns.png" label="Get Columns" oncommand="HackBar.SQL.DoubleQuery('4')"/>
+                  <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/data.png" label="Get Data" oncommand="HackBar.SQL.DoubleQuery('5')"/>  
+                  </menupopup>
+                  </menu>
+               </menupopup>
+            </toolbarbutton>
+            <!-- / ERROR BASED - DOUBLE QUERY -->
+		
+		
+		<!-- JAVA SCRIPT - LIVE HTTP HEADERS - TAMPER DATA - SOURCE CODE-->
+		  <toolbarbutton class="menuitem-iconic" type="menu" label="TOOLS" onmouseover="HackBar.GUI.openToolbarButton(this)">
+			<menupopup id="menu_ToolsPopup">
+			   <menuitem id="jsSwitchMenu" insertafter="devToolsSeparator" label="&javaScriptEnable.label;" accesskey="&javaScriptEnable.accesskey;" type="checkbox" oncommand="jsSwitch.toggleJS();" />
+			   <menuitem id="livehttpheaders_title" label="&livehttpheaders.live.title;" oncommand="livehttpheaders.task.openLiveHTTPHeaders();" />
+			   <menuitem label="&tamperdata.taskmenu.item;"  oncommand="openTamper();" />
+			   <menu class="menu-iconic vs-app-icon" label="&vs.vs;" accesskey="V">
+			   <menupopup onpopupshowing="gViewSourceExtensionObject.onMainPopupShowing(event);"/>
+		       </menu>
+			</menupopup>
+		  </toolbarbutton>		
+		<!-- / JAVA SCRIPT / LIVE HTTP HEADERS / TAMPER DATA / SOURCE CODE-->
+				
+		
+            <!-- WAF BYPASS MENU -->
+            <toolbarbutton class="menuitem-iconic" type="menu" label="&hackbar.WAFMenuLabel;" onmouseover="HackBar.GUI.openToolbarButton(this)">
+            <menupopup> 
+            <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/waf_set.png" label="/*!_STRING_*/" oncommand="HackBar.SQL.CalcWaf('1')"/>
+            <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/waf_set.png" label="/*!50000_STRING_*/" oncommand="HackBar.SQL.CalcWaf('2')"/>
+			<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/waf_set.png" label="/*!12345_STRING_*/" oncommand="HackBar.SQL.CalcWaf('3')"/>
+			<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/waf_set.png" label="/*!13337_STRING_*/" oncommand="HackBar.SQL.CalcWaf('4')"/>     
+            <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/waf_set.png" label="cutoffCUTOFFWAFwaf" oncommand="HackBar.SQL.CalcWaf('5')"/>
+            <menuseparator/>
+            <menu tooltiptext="" label="WAF-SETS">
+                <menupopup>
+                <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/tables.png" label="Get tables GROUP_CONCAT" oncommand="HackBar.SQL.SelectQueries('5')"/>
+                 <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/columns.png" label="Get columns GROUP_CONCAT" oncommand="HackBar.SQL.SelectQueries('6')"/>  
+                    <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/tables.png" label="Get tables One shot" oncommand="HackBar.SQL.SelectQueries('7')"/>
+                <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/columns.png" label="Get columns One shot" oncommand="HackBar.SQL.SelectQueries('8')"/>                                       
+                </menupopup>
+             </menu>      
+      </menupopup>      
+            </toolbarbutton>
+      <!-- / WAF BYPASS MENU -->
+
+            <!-- ENCODING MENU ITEMS -->
+            <toolbarbutton type="menu" tooltiptext="&hackbar.encdecMenuTooltip;" label="&hackbar.encdecMenuLabel;" onmouseover="HackBar.GUI.openToolbarButton(this)">
+              <menupopup>
+                <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/uue.png" tooltiptext="&hackbar.UUETooltip;" label="&hackbar.UUELabel;" oncommand="hackBar.selectionToBase64( 'encode' )" />
+                <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/uud.png" tooltiptext="&hackbar.UUDTooltip;" label="&hackbar.UUDLabel;" oncommand="hackBar.selectionToBase64( 'decode' )" />
+                <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/urle.png" tooltiptext="&hackbar.URLETooltip;" label="&hackbar.URLELabel;" oncommand="hackBar.selectionToURL( 'encode' )" />
+                <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/urld.png" tooltiptext="&hackbar.URLDTooltip;" label="&hackbar.URLDLabel;" oncommand="hackBar.selectionToURL( 'decode' )" />
+                <menu tooltiptext="&hackbar.encodingHexEncTooltip;" label="&hackbar.encodingHexEncLabel;">
+                  <menupopup>
+                    <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/string.png" tooltiptext="&hackbar.hexEncodingNoSep;" label="&hackbar.hexEncodingNoSep;" oncommand="hackBar.hexEncoding( '' )" />
+                    <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/string.png" tooltiptext="&hackbar.hexEncodingSpace;" label="&hackbar.hexEncodingSpace;" oncommand="hackBar.hexEncoding( ' ' )" />
+                    <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/string.png" tooltiptext="&hackbar.hexEncodingSemicol;" label="&hackbar.hexEncodingSemicol;" oncommand="hackBar.hexEncoding( ':' )" />
+                    <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/string.png" tooltiptext="&hackbar.IntToHex;" label="&hackbar.IntToHex;" oncommand="hackBar.NumberToHex()" />
+                  </menupopup>
+                </menu>
+                <menu tooltiptext="&hackbar.encodingHexDecTooltip;" label="&hackbar.encodingHexDecLabel;">
+                  <menupopup>
+                    <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/string.png" tooltiptext="&hackbar.HexToInt;" label="&hackbar.HexToInt;" oncommand="hackBar.HexToNumber()" />
+                    <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/string.png" tooltiptext="&hackbar.HexToChar;" label="&hackbar.HexToChar;" oncommand="hackBar.hexDecoding()" />
+                  </menupopup>
+                </menu>
+              </menupopup>
+            </toolbarbutton>
+            <!-- / ENCODING MENU ITEMS -->
+
+      <!-- HTML -->
+            <toolbarbutton type="menu" label="HTML" onmouseover="HackBar.GUI.openToolbarButton(this)">
+                <menupopup>
+                    <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/xss.png" label="Break Row" oncommand="HackBar.Strings.getUsefullString( 'br' )" />
+                    <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/xss.png" label="Separator Break Row" oncommand="HackBar.Strings.getUsefullString( 'separatorbr' )" />
+                    <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/xss.png" label="List" oncommand="HackBar.Strings.getUsefullString( 'li' )" />
+                    <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/xss.png" label="Bold" oncommand="HackBar.Strings.getUsefullString( 'b' )" />
+                    <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/xss.png" label="Close Bold" oncommand="HackBar.Strings.getUsefullString( 'cb' )" />
+                    <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/xss.png" label="Font Face Courier" oncommand="HackBar.Strings.getUsefullString( 'fontfc' )" />
+                    <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/xss.png" label="Font Color Red" oncommand="HackBar.Strings.getUsefullString( 'fontred' )" />
+                    <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/xss.png" label="Font Color Blue" oncommand="HackBar.Strings.getUsefullString( 'fontblue' )" />
+                    <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/xss.png" label="Font Color Green" oncommand="HackBar.Strings.getUsefullString( 'fontgreen' )" />
+                    <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/xss.png" label="Font Color Purple" oncommand="HackBar.Strings.getUsefullString( 'fontpurple' )" />
+                    <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/xss.png" label="Font Color Magenta" oncommand="HackBar.Strings.getUsefullString( 'fontmagenta' )" />
+                    <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/xss.png" label="Close Font" oncommand="HackBar.Strings.getUsefullString( 'fontc' )" />
+                </menupopup>
+            </toolbarbutton>
+      <!-- / HTML -->
+            <!-- ENCRYPTION MENU ITEMS -->
+            <toolbarbutton type="menu" tooltiptext="&hackbar.encMenuTooltip;" label="&hackbar.encMenuLabel;" onmouseover="HackBar.GUI.openToolbarButton(this)">
+              <menupopup>
+                <menu tooltiptext="&hackbar.md5MenuTooltip;" label="&hackbar.md5MenuLabel;">
+                  <menupopup>
+                    <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/encryption.png" tooltiptext="&hackbar.md5Tooltip;" label="&hackbar.md5Label;" oncommand="hackBar.selectionToMD5()"/>
+                    <menu tooltiptext="&hackbar.md5SendToTooltip;" label="&hackbar.md5SendToLabel;">
+                      <menupopup>
+                        <menuitem class="menuitem-iconic" tooltiptext="&hackbar.md5SendToRednoizeTooltip;" label="&hackbar.md5SendToRednoizeLabel;" oncommand="HackBar.Crypto.getClearTextPassword( 'md5' )"/>
+                      </menupopup>
+                    </menu>
+                  </menupopup>
+                </menu>
+                <menu tooltiptext="&hackbar.sha1MenuTooltip;" label="&hackbar.sha1MenuLabel;">
+                  <menupopup>
+                    <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/encryption.png" tooltiptext="&hackbar.sha1Tooltip;" label="&hackbar.sha1Label;" oncommand="hackBar.selectionToSHA(1)" />
+                    <menu tooltiptext="&hackbar.sha1SendToTooltip;" label="&hackbar.sha1SendToLabel;">
+                      <menupopup>
+                        <menuitem class="menuitem-iconic" tooltiptext="&hackbar.sha1SendToRednoizeTooltip;" label="&hackbar.sha1SendToRednoizeLabel;" oncommand="HackBar.Crypto.getClearTextPassword( 'sha1' )"/>
+                      </menupopup>
+                    </menu>
+                  </menupopup>
+                </menu>
+                <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/encryption.png" tooltiptext="&hackbar.sha2Tooltip;" label="&hackbar.sha2Label;" oncommand="hackBar.selectionToSHA(256)" />
+                <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/encryption_weak.png" tooltiptext="&hackbar.rot13Tooltip;" label="&hackbar.rot13Label;" oncommand="hackBar.selectionToRot13()" />
+              </menupopup>
+            </toolbarbutton>
+            <!-- / ENCRYPTION MENU ITEMS -->
+            
+
+			
+			<!-- MISC MENU ITEMS -->
+            <toolbarbutton id="hackBarStringButton" type="menu" tooltiptext="&hackbar.miscMenuTooltip;" label="&hackbar.miscMenuLabel;" onmouseover="HackBar.GUI.openToolbarButton(this)">
+              <menupopup>
+                <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/addslashes.png" tooltiptext="&hackbar.addslashesTooltip;" label="&hackbar.addslashesLabel;" oncommand="HackBar.Strings.addslashes()" />
+                <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/stripslashes.png" tooltiptext="&hackbar.stripslashesTooltip;" label="&hackbar.stripslashesLabel;" oncommand="HackBar.Strings.stripslashes()" />
+                <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/stripspaces.png" tooltiptext="&hackbar.stripspacesTooltip;" label="&hackbar.stripspacesLabel;" oncommand="HackBar.Strings.stripspaces()" />
+                <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/string.png" tooltiptext="&hackbar.reverseTooltip;" label="&hackbar.reverseLabel;" oncommand="HackBar.Strings.reverseString( )" />
+                <menu tooltiptext="&hackbar.usefullStringsMenuTooltip;" label="&hackbar.usefullStringsMenuLabel;">
+                  <menupopup>
+                    <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/string.png" tooltiptext="&hackbar.pi;" label="&hackbar.pi;" oncommand="HackBar.Strings.getUsefullString( 'pi' )" />
+                    <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/string.png" tooltiptext="&hackbar.piBig;" label="&hackbar.piBig;" oncommand="HackBar.Strings.getUsefullString( 'piBig' )" />
+                    <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/string.png" tooltiptext="&hackbar.phi;" label="&hackbar.phi;" oncommand="HackBar.Strings.getUsefullString( 'phi' )" />
+                    <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/string.png" tooltiptext="&hackbar.loremIpsum;" label="&hackbar.loremIpsum;" oncommand="HackBar.Strings.getUsefullString( 'lorem' )" />
+                    <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/string.png" tooltiptext="&hackbar.fibonacci;" label="&hackbar.fibonacci;" oncommand="HackBar.Strings.getUsefullString( 'fibonacci' )" />
+                    <!-- Buffer Overflow submenu -->
+                    <menu tooltiptext="&hackbar.bufferOverflowTooltip;" label="&hackbar.bufferOverflowLabel;">
+                      <menupopup>
+                        <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/string.png" tooltiptext="&hackbar.Overflow128;" label="&hackbar.Overflow128;" oncommand="HackBar.Strings.generateOverflowString( 128 )" />
+                        <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/string.png" tooltiptext="&hackbar.Overflow512;" label="&hackbar.Overflow512;" oncommand="HackBar.Strings.generateOverflowString( 512 )" />
+                        <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/string.png" tooltiptext="&hackbar.Overflow1024;" label="&hackbar.Overflow1024;" oncommand="HackBar.Strings.generateOverflowString( 1024 )" />
+                        <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/string.png" tooltiptext="&hackbar.Overflow2048;" label="&hackbar.Overflow2048;" oncommand="HackBar.Strings.generateOverflowString( 2048 )" />
+                        <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/string.png" tooltiptext="&hackbar.OverflowCustom;" label="&hackbar.OverflowCustom;" oncommand="HackBar.Strings.generateOverflowString( -1 )" />
+                      </menupopup>
+                    </menu>
+                    <!-- / Buffer Overflow submenu -->
+                  </menupopup>
+                </menu>
+              </menupopup>
+            </toolbarbutton>
+            <!-- / MISC MENU ITEMS -->
+      <!-- XSS MENU ITEMS -->
+            <toolbarbutton class="menuitem-iconic" type="menu" label="XSS" onmouseover="HackBar.GUI.openToolbarButton(this)">
+			
+              <menupopup>
+                <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/xss.png"  label="String.fromCharCode()" oncommand="hackBar.selectionToChar( 'stringFromCharCode' )" />
+                <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/xss.png"  label="HTML Characters" oncommand="hackBar.selectionToChar( 'htmlChar' )" />
+                <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/xss_alert.png"  label="alert(XSS)" oncommand="HackBar.Strings.getUsefullString( 'alert' )" />
+                <menuseparator/>
+				
+				<menu class="menuitem-iconic" image="chrome://hackbar/skin/xss_alert.png" type="menu" label="XSS Cheat Sheet">
+                <menupopup>           
+                 
+					<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/xss_alert.png" label="Payload 1." oncommand="HackBar.SQL.statementsTpro('34')"/>
+					<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/xss_alert.png" label="Payload 2." oncommand="HackBar.SQL.statementsTpro('35')"/>
+					<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/xss_alert.png" label="Payload 3." oncommand="HackBar.SQL.statementsTpro('36')"/>
+					<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/xss_alert.png" label="Payload 4." oncommand="HackBar.SQL.statementsTpro('37')"/>
+					<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/xss_alert.png" label="Payload 5." oncommand="HackBar.SQL.statementsTpro('38')"/>
+					<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/xss_alert.png" label="Payload 6." oncommand="HackBar.SQL.statementsTpro('39')"/>
+					<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/xss_alert.png" label="Payload 7." oncommand="HackBar.SQL.statementsTpro('40')"/>
+					<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/xss_alert.png" label="Payload 8." oncommand="HackBar.SQL.statementsTpro('41')"/>
+					<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/xss_alert.png" label="Payload 9." oncommand="HackBar.SQL.statementsTpro('42')"/>
+					<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/xss_alert.png" label="Payload 10." oncommand="HackBar.SQL.statementsTpro('43')"/>
+					<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/xss_alert.png" label="Payload 11." oncommand="HackBar.SQL.statementsTpro('44')"/>
+					<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/xss_alert.png" label="Payload 12." oncommand="HackBar.SQL.statementsTpro('45')"/>
+					<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/xss_alert.png" label="Payload 13." oncommand="HackBar.SQL.statementsTpro('46')"/>
+					<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/xss_alert.png" label="Payload 14." oncommand="HackBar.SQL.statementsTpro('47')"/>
+					<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/xss_alert.png" label="Payload 15." oncommand="HackBar.SQL.statementsTpro('48')"/>
+					<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/xss_alert.png" label="Payload 16." oncommand="HackBar.SQL.statementsTpro('49')"/>
+					<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/xss_alert.png" label="Payload 17." oncommand="HackBar.SQL.statementsTpro('50')"/>
+					<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/xss_alert.png" label="Payload 18." oncommand="HackBar.SQL.statementsTpro('51')"/>
+					<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/xss_alert.png" label="Payload 19." oncommand="HackBar.SQL.statementsTpro('52')"/>
+					<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/xss_alert.png" label="Payload 20." oncommand="HackBar.SQL.statementsTpro('53')"/>
+					<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/xss_alert.png" label="Payload 21." oncommand="HackBar.SQL.statementsTpro('54')"/>
+					<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/xss_alert.png" label="Payload 22." oncommand="HackBar.SQL.statementsTpro('55')"/>
+					<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/xss_alert.png" label="Payload 23." oncommand="HackBar.SQL.statementsTpro('56')"/>
+					<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/xss_alert.png" label="Payload 24." oncommand="HackBar.SQL.statementsTpro('57')"/>
+					<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/xss_alert.png" label="Payload 25." oncommand="HackBar.SQL.statementsTpro('58')"/>
+					<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/xss_alert.png" label="Payload 26." oncommand="HackBar.SQL.statementsTpro('59')"/>
+					<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/xss_alert.png" label="Payload 27." oncommand="HackBar.SQL.statementsTpro('60')"/>
+					<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/xss_alert.png" label="Payload 28." oncommand="HackBar.SQL.statementsTpro('61')"/>
+					<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/xss_alert.png" label="Payload 29." oncommand="HackBar.SQL.statementsTpro('62')"/>
+					<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/xss_alert.png" label="Payload 30." oncommand="HackBar.SQL.statementsTpro('63')"/>
+                </menupopup>
+                </menu>   
+			   
+			   <menu class="menuitem-iconic" image="chrome://hackbar/skin/xss_alert.png" type="menu" label="XSS Cont...">
+                <menupopup> 
+				<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/xss_alert.png" label="Payload 31." oncommand="HackBar.SQL.statementsTpro('64')"/>
+				<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/xss_alert.png" label="Payload 32." oncommand="HackBar.SQL.statementsTpro('65')"/>
+				<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/xss_alert.png" label="Payload 33." oncommand="HackBar.SQL.statementsTpro('66')"/>
+				<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/xss_alert.png" label="Payload 34." oncommand="HackBar.SQL.statementsTpro('67')"/>
+				<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/xss_alert.png" label="Payload 35." oncommand="HackBar.SQL.statementsTpro('68')"/>
+				<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/xss_alert.png" label="Payload 36." oncommand="HackBar.SQL.statementsTpro('69')"/>
+				<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/xss_alert.png" label="Payload 37." oncommand="HackBar.SQL.statementsTpro('70')"/>
+				<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/xss_alert.png" label="Payload 38." oncommand="HackBar.SQL.statementsTpro('71')"/>
+				<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/xss_alert.png" label="Payload 39." oncommand="HackBar.SQL.statementsTpro('72')"/>
+				<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/xss_alert.png" label="Payload 40." oncommand="HackBar.SQL.statementsTpro('73')"/>
+				<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/xss_alert.png" label="Payload 41." oncommand="HackBar.SQL.statementsTpro('74')"/>
+				<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/xss_alert.png" label="Payload 42." oncommand="HackBar.SQL.statementsTpro('75')"/>
+				<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/xss_alert.png" label="Payload 43." oncommand="HackBar.SQL.statementsTpro('76')"/>
+				<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/xss_alert.png" label="Payload 44." oncommand="HackBar.SQL.statementsTpro('77')"/>
+				<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/xss_alert.png" label="Payload 45." oncommand="HackBar.SQL.statementsTpro('78')"/>
+				<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/xss_alert.png" label="Payload 46." oncommand="HackBar.SQL.statementsTpro('79')"/>
+				<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/xss_alert.png" label="Payload 46." oncommand="HackBar.SQL.statementsTpro('80')"/>
+				<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/xss_alert.png" label="Payload 48." oncommand="HackBar.SQL.statementsTpro('81')"/>
+				<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/xss_alert.png" label="Payload 49." oncommand="HackBar.SQL.statementsTpro('82')"/>
+				<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/xss_alert.png" label="Payload 50." oncommand="HackBar.SQL.statementsTpro('83')"/>
+                </menupopup>
+                </menu>
+			   
+			  </menupopup>
+			  
+			  
+            </toolbarbutton>
+            <!-- / XSS MENU ITEMS -->
+			
+			
+			 <!--  LFI MENU ITEMS -->
+			 <toolbarbutton class="menuitem-iconic" type="menu" label="LFI" onmouseover="HackBar.GUI.openToolbarButton(this)">
+			 <menupopup>
+			 
+			 
+			    <menu class="menuitem-iconic" image="chrome://hackbar/skin/xss_alert.png" type="menu" label="LFI Cheat Sheet">
+                <menupopup>
+	            <menuitem class="menuitem-iconic" image="chrome://hackbar/skin/tables.png" label="Payload 1." oncommand="HackBar.SQL.statementsTpro('84')"/>
+				<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/tables.png" label="Payload 2." oncommand="HackBar.SQL.statementsTpro('85')"/>
+				<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/tables.png" label="Payload 3." oncommand="HackBar.SQL.statementsTpro('86')"/>
+				<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/tables.png" label="Payload 4." oncommand="HackBar.SQL.statementsTpro('87')"/>
+				<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/tables.png" label="Payload 5." oncommand="HackBar.SQL.statementsTpro('88')"/>
+				<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/tables.png" label="Payload 6." oncommand="HackBar.SQL.statementsTpro('89')"/>
+				<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/tables.png" label="Payload 7." oncommand="HackBar.SQL.statementsTpro('90')"/>
+				<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/tables.png" label="Payload 8." oncommand="HackBar.SQL.statementsTpro('91')"/>
+				<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/tables.png" label="Payload 9." oncommand="HackBar.SQL.statementsTpro('92')"/>
+				<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/tables.png" label="Payload 10." oncommand="HackBar.SQL.statementsTpro('93')"/>
+				<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/tables.png" label="Payload 11." oncommand="HackBar.SQL.statementsTpro('94')"/>
+				<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/tables.png" label="Payload 12." oncommand="HackBar.SQL.statementsTpro('95')"/>
+				<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/tables.png" label="Payload 13." oncommand="HackBar.SQL.statementsTpro('96')"/>
+				<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/tables.png" label="Payload 14." oncommand="HackBar.SQL.statementsTpro('97')"/>
+				<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/tables.png" label="Payload 15." oncommand="HackBar.SQL.statementsTpro('98')"/>
+				<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/tables.png" label="Payload 16." oncommand="HackBar.SQL.statementsTpro('99')"/>
+				<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/tables.png" label="Payload 17." oncommand="HackBar.SQL.statementsTpro('100')"/>
+				<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/tables.png" label="Payload 18." oncommand="HackBar.SQL.statementsTpro('101')"/>
+				<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/tables.png" label="Payload 19." oncommand="HackBar.SQL.statementsTpro('102')"/>
+				<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/tables.png" label="Payload 20." oncommand="HackBar.SQL.statementsTpro('103')"/>
+				<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/tables.png" label="Payload 21." oncommand="HackBar.SQL.statementsTpro('104')"/>
+				<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/tables.png" label="Payload 22." oncommand="HackBar.SQL.statementsTpro('105')"/>
+				<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/tables.png" label="Payload 23." oncommand="HackBar.SQL.statementsTpro('106')"/>
+				<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/tables.png" label="Payload 24." oncommand="HackBar.SQL.statementsTpro('107')"/>
+				<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/tables.png" label="Payload 25." oncommand="HackBar.SQL.statementsTpro('108')"/>
+				<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/tables.png" label="Payload 26." oncommand="HackBar.SQL.statementsTpro('109')"/>
+				<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/tables.png" label="Payload 27." oncommand="HackBar.SQL.statementsTpro('110')"/>
+				<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/tables.png" label="Payload 28." oncommand="HackBar.SQL.statementsTpro('111')"/>
+				<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/tables.png" label="Payload 29." oncommand="HackBar.SQL.statementsTpro('112')"/>
+				<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/tables.png" label="Payload 30." oncommand="HackBar.SQL.statementsTpro('113')"/>
+				</menupopup>
+                </menu>
+				
+				<menu class="menuitem-iconic" image="chrome://hackbar/skin/xss_alert.png" type="menu" label="LFI Cont...">
+                <menupopup> 
+				<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/tables.png" label="Payload 31." oncommand="HackBar.SQL.statementsTpro('114')"/>
+				<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/tables.png" label="Payload 32." oncommand="HackBar.SQL.statementsTpro('115')"/>
+				<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/tables.png" label="Payload 33." oncommand="HackBar.SQL.statementsTpro('116')"/>
+				<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/tables.png" label="Payload 34." oncommand="HackBar.SQL.statementsTpro('117')"/>
+				<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/tables.png" label="Payload 35." oncommand="HackBar.SQL.statementsTpro('118')"/>
+				<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/tables.png" label="Payload 36." oncommand="HackBar.SQL.statementsTpro('119')"/>
+				<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/tables.png" label="Payload 37." oncommand="HackBar.SQL.statementsTpro('120')"/>
+				<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/tables.png" label="Payload 38." oncommand="HackBar.SQL.statementsTpro('121')"/>
+				<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/tables.png" label="Payload 39." oncommand="HackBar.SQL.statementsTpro('122')"/>
+				<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/tables.png" label="Payload 40." oncommand="HackBar.SQL.statementsTpro('123')"/>
+				<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/tables.png" label="Payload 41." oncommand="HackBar.SQL.statementsTpro('124')"/>
+				<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/tables.png" label="Payload 42." oncommand="HackBar.SQL.statementsTpro('125')"/>
+				<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/tables.png" label="Payload 43." oncommand="HackBar.SQL.statementsTpro('126')"/>
+				<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/tables.png" label="Payload 44." oncommand="HackBar.SQL.statementsTpro('127')"/>
+				<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/tables.png" label="Payload 45." oncommand="HackBar.SQL.statementsTpro('128')"/>
+				<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/tables.png" label="Payload 46." oncommand="HackBar.SQL.statementsTpro('129')"/>
+				<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/tables.png" label="Payload 47." oncommand="HackBar.SQL.statementsTpro('130')"/>
+				<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/tables.png" label="Payload 48." oncommand="HackBar.SQL.statementsTpro('131')"/>
+				<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/tables.png" label="Payload 49." oncommand="HackBar.SQL.statementsTpro('132')"/>
+				<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/tables.png" label="Payload 50." oncommand="HackBar.SQL.statementsTpro('133')"/>
+				<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/tables.png" label="Payload 51." oncommand="HackBar.SQL.statementsTpro('134')"/>
+				<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/tables.png" label="Payload 52." oncommand="HackBar.SQL.statementsTpro('135')"/>
+				<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/tables.png" label="Payload 53." oncommand="HackBar.SQL.statementsTpro('136')"/>
+				<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/tables.png" label="Payload 54." oncommand="HackBar.SQL.statementsTpro('137')"/>
+				<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/tables.png" label="Payload 55." oncommand="HackBar.SQL.statementsTpro('138')"/>
+				<menuitem class="menuitem-iconic" image="chrome://hackbar/skin/tables.png" label="Payload 56." oncommand="HackBar.SQL.statementsTpro('139')"/>
+				</menupopup>
+                </menu>
+			 
+			 </menupopup>
+			 </toolbarbutton>
+			  <!-- / LFI MENU ITEMS -->
+			
+          </hbox>
+        </toolbaritem>
+        <toolbaritem>
+          <vbox width="100">
+            <toolbarbutton id="hackBarCopyButton" tooltiptext="&hackbar.copyUrlTooltip;" label="&hackbar.loadURLLabel;" oncommand="hackBar.useCurrentUrl()" accesskey="a" />
+            <toolbarbutton id="hackBarSplitButton" tooltiptext="&hackbar.splitTooltip;" label="&hackbar.splitLabel;" oncommand="hackBar.splitUrl()" accesskey="s" />
+            <toolbarbutton id="hackBarWebButton" tooltiptext="&hackbar.executeTooltip;" accesskey="x" label="&hackbar.executeLabel;" oncommand="hackBar.loadUrl()" />
+          </vbox>
+          <vbox flex="1">
+            <textbox id="hackBarTargetUrl" multiline="true" rows="3" flex="1" persist="rows" onclick="HackBar.SQL.WichField('main_toogle')" onkeypress="if (event.keyCode == 13) if (event.ctrlKey) hackBar.loadUrl()" />
+          </vbox>		  
+          <vbox id="adjustpanel">		  
+            <toolbarbutton tooltiptext="&hackbar.removeRow;" image="chrome://hackbar/skin/minus.gif" oncommand="hackBar.adjustFieldSize( -2, 'hackBarTargetUrl' )" />
+            <toolbarbutton tooltiptext="&hackbar.addRow;" image="chrome://hackbar/skin/plus.gif" oncommand="hackBar.adjustFieldSize( 2, 'hackBarTargetUrl' )" />		
+		  </vbox>
+        </toolbaritem>
+
+
+    <toolbaritem> 
+          <hbox>
+            <label value="" control="" width="90" />
+            <command id="cmd_togglePostData" oncommand="hackBar.togglePostField()"/>
+            <checkbox id="hackBar_postDataCheckBox" label="Post data" checked="false" command="cmd_togglePostData" />
+            <command id="cmd_toggleRef" oncommand="hackBar.toggleReferrerField()"/>
+            <checkbox id="hackBar_referrerCheckBox" label="Referrer" checked="false" command="cmd_toggleRef" />
+          </hbox>
+      <toolbarbutton class="hackBarQuickEncodeButton2" tooltiptext="0xHEX -> CHAR" oncommand="hackBar.NULLxToString()"/>
+      <label class="quick" value="HEXENC.DEC (~/@H3LL4R_H5H MODDED HACK BAR)" /> 
+      <toolbarbutton class="hackBarQuickEncodeButton" tooltiptext="CHAR -> 0xHEX" oncommand="hackBar.StringTo0x( '' )"/>  
+      <label value="" control="" width="5" />     
+      <toolbarbutton class="hackBarQuickEncodeButton2" tooltiptext="ENC. -> DEC." oncommand="hackBar.UrlToString( '' )"/>     
+      <label class="quick" value="URLENC.DEC" />  
+      <toolbarbutton class="hackBarQuickEncodeButton" tooltiptext="DEC. -> ENC." oncommand="hackBar.stringToURL( '' )"/>     
+      <label value="" control="" width="5" />
+      <toolbarbutton class="hackBarQuickEncodeButton2" tooltiptext="B64 -> CHAR" oncommand="hackBar.selectionToBase64( 'decode' )"/> 
+      <label class="quick" value="B64ENC.DEC" />  
+      <toolbarbutton class="hackBarQuickEncodeButton" tooltiptext="CHAR -> B64" oncommand="hackBar.selectionToBase64( 'encode' )"/>
+      <label />
+	  
+      <!-- SHIFTED REPLACE FUNCTION -->
+      <textbox class="replace2" id="rstring1" value=""  emptytext="Insert string to replace"/>
+      <textbox class="replace2" id="rstring2" emptytext="Insert replacing string" />
+      <checkbox id="replace_check" label="Replace All" checked="true" tooltiptext="all=Whole URL  / uncheck=selected textarea" />
+      <toolbarbutton class="hackBarQuickEncodeButton" oncommand="HackBar.SQL.ExecuteReplaceTest()"/>  
+      <!-- SHIFTED REPLACE FUNCTION -->
+	  
+      <div id="separator3"><!-- sep --></div>
+      <toolbarbutton class="hackBarQuickEncodeButton3" tooltiptext="Insert Base64Spacer" oncommand="HackBar.SQL.statementsTpro('13')"/>
+      <checkbox id="main_toogle" checked="true" hidden="true" /><checkbox id="ref_toogle" hidden="true" /><checkbox id="post_toogle" hidden="true" />
+        </toolbaritem>
+
+        <toolbaritem id="hackBarTargetUrlPost" hidden="true">
+          <vbox>
+            <label value="Post data" control="hackBarTargetUrlPostField" width="90" />
+          </vbox>
+          <vbox flex="1">
+            <textbox id="hackBarTargetUrlPostField" multiline="true" rows="3" flex="1" persist="rows" onkeypress="if (event.keyCode == 13) if (event.ctrlKey) hackBar.loadUrl()" />
+          </vbox>	  
+          <vbox>
+            <toolbarbutton tooltiptext="&hackbar.removeRow;" image="chrome://hackbar/skin/minus.gif" oncommand="hackBar.adjustFieldSize( -2, 'hackBarTargetUrlPostField' )" />
+            <toolbarbutton tooltiptext="&hackbar.addRow;" image="chrome://hackbar/skin/plus.gif" oncommand="hackBar.adjustFieldSize( 2, 'hackBarTargetUrlPostField' )" />
+          </vbox>
+        </toolbaritem>
+        <toolbaritem id="hackBarTargetUrlReferrer" hidden="true">
+          <vbox>
+            <label value="Referrer" control="hackBarTargetUrlReferrerField" width="90" />
+          </vbox>
+          <vbox flex="1">
+            <textbox id="hackBarTargetUrlReferrerField" multiline="true" rows="3" flex="1" persist="rows" onkeypress="if (event.keyCode == 13) if (event.ctrlKey) hackBar.loadUrl()" />
+          </vbox>		  
+          <vbox>
+            <toolbarbutton tooltiptext="&hackbar.removeRow;" image="chrome://hackbar/skin/minus.gif" oncommand="hackBar.adjustFieldSize( -2, 'hackBarTargetUrlReferrerField' )" />
+            <toolbarbutton tooltiptext="&hackbar.addRow;" image="chrome://hackbar/skin/plus.gif" oncommand="hackBar.adjustFieldSize( 2, 'hackBarTargetUrlReferrerField' )" />
+          </vbox>
+        </toolbaritem>
+      </vbox>
+    </toolbar>
+  </toolbox>
+</overlay>

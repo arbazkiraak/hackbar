@@ -1,0 +1,86 @@
+@namespace url("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul");
+
+menu#firstMenuItem {margin-left: 88px; 
+}
+
+/* Fixed bug https://bugzilla.mozilla.org/show_bug.cgi?id=1037303 */
+toolbar#hackBarToolbar {
+ max-height: 1000px !important;
+ }
+ 
+ #hackBarToolbar{
+	background-color:#f0f0f0;
+	-moz-appearance:none;
+	color:lime;
+	border:1px solid black;
+ }
+ #hackBarTargetUrlReferrerField{
+	background-color:#f0f0f0;
+	-moz-appearance:none;
+	color:black;
+	border-radius:10px;
+	border:1px solid black;
+ }
+ 
+ #hackBarTargetUrlPostField{
+	background-color:#f0f0f0;
+	-moz-appearance:none;
+	color:black;
+	border-radius:10px;
+	border:1px solid black;
+ }
+ #hackBarTargetUrl{
+	background-color:#f0f0f0;
+	-moz-appearance:none;
+	color:black;
+	border-radius:10px;
+	border:1px solid black; 
+ }
+ menupopup{
+	background-color:#f0f0f0;
+	-moz-appearance:none;
+	color:#f0f0f0;
+	border-radius:10px;
+	border:1px solid black;
+ }
+ label{
+  -moz-appearance:none;
+  color:black;
+ }
+ menuseparator{
+   background-color:black;
+   color:lime;
+ }
+ #hackBarPlusMinusSelection{
+  background-color:#f0f0f0;
+  border:none;
+ -moz-appearance:none;
+  color:lime;
+ }
+ 
+toolbarbutton#hackBarWebButton { list-style-image: url("chrome://hackbar/skin/web.png");background-color:#f0f0f0;-moz-appearance:none;color:black;}
+toolbarbutton#hackBarCopyButton { list-style-image: url("chrome://hackbar/skin/load.png");background-color:#f0f0f0;-moz-appearance:none;color:black;}
+toolbarbutton#hackBarSplitButton { list-style-image: url("chrome://hackbar/skin/split.gif");background-color:#f0f0f0;-moz-appearance:none;color:black;}
+
+/* Button */
+toolbarbutton#hackBarToolbarButton { list-style-image: url("chrome://hackbar/skin/toolbar_button.png");background-color:white;-moz-appearance:none;color:black;border:1px solid black; }
+toolbarbutton.custombutton {-moz-image-region: rect( 0px 24px 24px  0px);}
+toolbarbutton.custombutton:hover {-moz-image-region: rect(24px 24px 48px  0px);}
+[iconsize="small"] toolbarbutton.custombutton {-moz-image-region: rect( 0px 40px 16px 24px);}
+[iconsize="small"] toolbarbutton.custombutton:hover {-moz-image-region: rect(24px 40px 40px 24px);}
+
+/* t.PRO */
+#enc{padding-left:5px;}
+toolbarbutton.hackBarQuickEncodeButton { list-style-image: url("chrome://hackbar/skin/quick1.png"); }
+toolbarbutton.hackBarQuickEncodeButton2 { list-style-image: url("chrome://hackbar/skin/quick2.png"); }
+toolbarbutton.hackBarQuickEncodeButton3 { list-style-image: url("chrome://hackbar/skin/quick3.png"); }
+.quick{margin-top:5px;}
+.adjust{font-size:9px;}
+.replace{font-size:12px;margin-left:8px;background-color:white;-moz-appearance:none;color:black;border:1px solid black;}
+#separator{height:3px;border-top:1px dashed grey;margin-top:5px;margin-bottom:9px;margin-left:3px;}
+#separator2{height:3px;border-left:1px dashed grey;margin-bottom:2px;margin-left:3px;margin-right:3px;}
+#separator3{height:3px;border-left:1px dashed grey;margin-bottom:2px;margin-left:3px;}
+.replace2{margin:0px;margin-left:6px;padding:0px;height:15px;font-size:12px;padding-left:2px;background-color:white;-moz-appearance:none;color:black;background-color:white;-moz-appearance:none;color:black;border:1px solid black;}
+#replace_holder{margin-left:3px;}
+#rlabel{margin-top:7px;}
+#adjustpanel{margin-right:3px;margin-top:2px;}
